@@ -1,0 +1,48 @@
+<mvc:View controllerName="ui5.test.controller.InvoiceList"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc">
+
+	<Table id="invoiceTable"
+		class="sapUiResponsiveMargin"
+		items="{invoice>/Invoices}">
+		<headerToolbar>
+			<Toolbar>
+				<Title text="{i18n>listTitle}" />
+				<SearchField
+					width="30%"
+					search=".onFilterInvoices" />
+				<Button icon="sap-icon://add" press=".onAddInvoice" />
+				<Button icon="sap-icon://action-settings" press=".onSettings" />
+			</Toolbar>
+		</headerToolbar>
+		<columns>
+			<Column>
+				<Text text="{i18n>taskName}" />
+			</Column>
+			<Column>
+				<Text text="{i18n>taskType}" />
+			</Column>
+			<Column>
+				<Text text="{i18n>responsible}" />
+			</Column>
+			<Column>
+				<Text text="{i18n>startDate}" />
+			</Column>
+			<Column>
+				<Text text="{i18n>endDate}" />
+			</Column>
+		</columns>
+
+		<items>
+			<ColumnListItem>
+				<cells>
+					<Text text="{invoice>taskName}" />
+					<Text text="{invoice>taskType}" />
+					<Text text="{invoice>responsible}" />
+					<Text text="{invoice>startDate}" />
+					<Text text="{invoice>endDate}" />
+				</cells>
+			</ColumnListItem>
+		</items>
+	</Table>
+</mvc:View>

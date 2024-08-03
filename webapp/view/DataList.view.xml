@@ -1,0 +1,90 @@
+<mvc:XMLView
+    controllerName="ui5.test.controller.DataList"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core">
+
+    <Table
+        id="dataList"
+        class="sapUiResponsiveMargin"
+        width="auto"
+        items="{
+                path : 'task>/Tasks',
+			    sorter : {
+				    path : 'taskName',
+				    group : false
+			    }
+             }">
+        <headerToolbar>
+            <Toolbar>
+                <Title text="{i18n>listTitle}" />
+                <SearchField
+                    width="30%"
+                    search=".onFilterData" />
+                <ToolbarSpacer />
+                <Button icon="sap-icon://add" id="addDataButton"
+                    press=".OnAddData"></Button>
+                <Button icon="sap-icon://action-settings" id="settingsButton" press=".onSettings"></Button>
+            </Toolbar>
+        </headerToolbar>
+        <columns>
+            <Column>
+                <Text text="{i18n>taskName}" />
+            </Column>
+            <Column>
+                <Text text="{i18n>taskType}" />
+            </Column>
+            <Column>
+                <Text text="{i18n>responsible}" />
+            </Column>
+            <Column>
+                <Text text="{i18n>startDate}" />
+            </Column>
+            <Column>
+                <Text text="{i18n>endDate}" />
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Input
+                        value="{task>taskName}"
+                        change=".onTaskNameChange"
+                        editable="{= ${local>/editMode} }" />
+                    <Select
+                        id="typeSelect"
+                        selectedKey="{task>taskType}"
+                        change=".onTaskTypeChange"
+                        editable="{= ${local>/editMode} }">
+                        <items>
+                            <core:Item key="Тип 1" text="Тип 1" />
+                            <core:Item key="Тип 2" text="Тип 2" />
+                            <core:Item key="Тип 3" text="Тип 3" />
+                            <core:Item key="Тип 4" text="Тип 4" />
+                        </items>
+                    </Select>
+                    <HBox>
+                        <Input
+                            value="{task>responsible}"
+                            change=".onResponsibleChange"
+                            editable="{= ${local>/editMode} }"
+                        />
+                        <Button text="?" press=".onOpenResponsibleDialog"
+                            enabled="{= ${local>/editMode} }" />
+                    </HBox>
+                    <Input
+                        value="{task>startDate}"
+                        change=".onStartDateChange"
+                        editable="{= ${local>/editMode} }"
+                        liveChange=".onDateChange" />
+                    <Input
+                        value="{task>endDate}"
+                        change=".onEndDateChange"
+                        editable="{= ${local>/editMode} }"
+                        liveChange=".onDateChange" />
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</mvc:XMLView>

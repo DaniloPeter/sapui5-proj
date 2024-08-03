@@ -1,0 +1,23 @@
+{
+  "name": "ui5",
+  "version": "1.0.0",
+  "description": "The UI5 Test Application",
+  "scripts": {
+    "start": "ui5 serve -o index.html"
+  },
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-xml": "^0.1.0",
+    "ui5-middleware-simpleproxy": "^3.2.18"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  }
+}

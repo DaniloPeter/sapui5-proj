@@ -1,0 +1,28 @@
+<core:FragmentDefinition
+    xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog
+        title="Настройки столбцов" id="settingsDialog">
+        <content>
+            <VBox>
+                <CheckBox
+                    selected="{columnVisibility>/taskName}"
+                    text="Название задачи" />
+                <CheckBox
+                    selected="{columnVisibility>/taskType}"
+                    text="Тип задачи" />
+                <CheckBox
+                    selected="{columnVisibility>/responsible}"
+                    text="Ответственный" />
+                <CheckBox
+                    selected="{columnVisibility>/startDate}"
+                    text="Дата начала" />
+                <CheckBox
+                    selected="{columnVisibility>/endDate}"
+                    text="Дата окончания" />
+            </VBox>
+        </content>
+        <buttons>
+            <Button text="ОК" press=".onDialogClose" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

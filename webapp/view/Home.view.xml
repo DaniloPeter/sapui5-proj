@@ -1,0 +1,43 @@
+<mvc:View
+    controllerName="ui5.test.controller.Home"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:mvc="sap.ui.core.mvc">
+    <Panel headerText="{i18n>PanelTitle}"
+        class="sapUiResponsiveMargin"
+        width="auto">
+        <content>
+            <HBox class="sapUiSmallMargin sapMFlexBoxJustifySpaceBetween">
+                <Select id="typeSelect" selectedKey="0">
+                    <items>
+                        <core:Item key="0" text="All" />
+                        <core:Item key="1" text="Тип 1" />
+                        <core:Item key="2" text="Тип 2" />
+                        <core:Item key="3" text="Тип 3" />
+                        <core:Item key="4" text="Тип 4" />
+                    </items>
+                </Select>
+                <HBox>
+                    <Input
+                        id="inputField"
+                        placeholder="Ответственный"
+                        value="{/responsible}" />
+                    <Button text="?" press=".onOpenDialog" />
+                </HBox>
+                <Input
+                    id="startDate"
+                    placeholder="Дата постановки задачи"
+                    value="{/startDate}"
+                    liveChange=".onDateChange" />
+                <Input
+                    id="endDate"
+                    placeholder="Дата окончания"
+                    value="{/endDate}"
+                    liveChange=".onDateChange" />
+                <Button text="Очистить" press=".onClearFields" />
+                <Button text="Применить" press=".onApplyFilter" />
+                <Button text="Сбросить" press=".onRefresh" />
+            </HBox>
+        </content>
+    </Panel>
+</mvc:View>

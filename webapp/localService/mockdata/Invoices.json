@@ -1,0 +1,30 @@
+[
+  {
+    "taskName": "Задача 1",
+    "taskType": "Тип 1",
+    "responsible": "Пользователь 1",
+    "startDate": "01.07.2024",
+    "endDate": "05.07.2024"
+  },
+  {
+    "taskName": "Задача 2",
+    "taskType": "Тип 1",
+    "responsible": "Пользователь 1",
+    "startDate": "01.07.2024",
+    "endDate": "05.07.2024"
+  },
+  {
+    "taskName": "Задача 3",
+    "taskType": "Тип 1",
+    "responsible": "Пользователь 1",
+    "startDate": "01.07.2024",
+    "endDate": "05.07.2024"
+  },
+  {
+    "taskName": "Задача 4",
+    "taskType": "Тип 1",
+    "responsible": "Пользователь 1",
+    "startDate": "01.07.2024",
+    "endDate": "05.07.2024"
+  }
+]

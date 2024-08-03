@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Test App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script
+      id="sap-ui-bootstrap"
+      src="resources/sap-ui-core.js"
+      data-sap-ui-libs="sap.m, sap.ui.layout, sap.tnt"
+      data-sap-ui-theme="sap_horizon_dark"
+      data-sap-ui-compat-version="edge"
+      data-sap-ui-async="true"
+      data-sap-ui-onInit="module:sap/ui/core/ComponentSupport"
+      data-sap-ui-resourceroots='{
+        "ui5.test": "./"
+      }'
+    ></script>
+  </head>
+  <body class="sapUiBody" id="content">
+    <div
+      data-sap-ui-component
+      data-name="ui5.test"
+      data-id="container"
+      data-settings='{"id" : "test"}'
+    ></div>
+  </body>
+</html>
