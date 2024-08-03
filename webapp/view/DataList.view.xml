@@ -23,7 +23,7 @@
                     search=".onFilterData" />
                 <ToolbarSpacer />
                 <Button icon="sap-icon://add" id="addDataButton"
-                    press=".OnAddData"></Button>
+                    press=".onAddData"></Button>
                 <Button icon="sap-icon://action-settings" id="settingsButton" press=".onSettings"></Button>
             </Toolbar>
         </headerToolbar>

@@ -392,6 +392,28 @@ sap.ui.define(
         const oBinding = oList.getBinding("items");
         oBinding.filter(aFilter);
       },
+      // new method
+
+      onAddData() {
+        const oModel = this.getView().getModel("task"); // Assuming the model is named "task"
+        const aData = oModel.getData().Tasks; // Get current data
+
+        // Create new empty object; adjust the properties as per your model
+        const newItem = {
+          taskName: "",
+          taskType: "",
+          responsible: "",
+          startDate: "",
+          endDate: "",
+        };
+
+        // Add new item at the beginning of the array
+        aData.unshift(newItem);
+
+        // Update the model with the new data
+        oModel.setProperty("/Tasks", aData);
+        this._applyStringEdit(true);
+      },
     });
   }
 );
