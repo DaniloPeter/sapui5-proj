@@ -11,6 +11,8 @@
                     <content>
                         <mvc:XMLView
                             viewName="ui5.test.view.Home"
+                            id="HomePanel"
+                            visible="{= !${local>/editMode} }"
                         />
                         <mvc:XMLView
                             viewName="ui5.test.view.DataList"
