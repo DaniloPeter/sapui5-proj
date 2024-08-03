@@ -1,17 +1,18 @@
-<core:FragmentDefinition xmlns:mvc="sap.ui.core.mvc"
+<core:FragmentDefinition
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
-    <Dialog title="Выберите ответственного" afterClose=".onResponsiblDialogClose">
-        <List id="responsibleList" itemPress=".onResponsibleItemSelect">
-            <items>
-                <StandardListItem title="Ответственный 1" />
-                <StandardListItem title="Ответственный 2" />
-                <StandardListItem title="Ответственный 3" />
-                <StandardListItem title="Ответственный 4" />
-            </items>
-        </List>
-        <endButton>
+    <Dialog id="responsibleDialog" title="Выберите ответственного"
+        afterClose=".onResponsiblDialogClose">
+        <content>
+            <VBox>
+                <Button text="Пользователь 1" press=".onResponsibleSelect" />
+                <Button text="Пользователь 2" press=".onResponsibleSelect" />
+                <Button text="Пользователь 3" press=".onResponsibleSelect" />
+                <Button text="Пользователь 4" press=".onResponsibleSelect" />
+            </VBox>
+        </content>
+        <beginButton>
             <Button text="Закрыть" press=".onResponsiblDialogClose" />
-        </endButton>
+        </beginButton>
     </Dialog>
 </core:FragmentDefinition>

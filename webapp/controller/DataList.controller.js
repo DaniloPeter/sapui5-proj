@@ -47,6 +47,43 @@ sap.ui.define(
         const oI18nModel = this.getOwnerComponent().getModel("i18n");
         return oI18nModel.getResourceBundle().getText(key);
       },
+      onOpenResponsibleDialog(oEvent) {
+        this._getResponsibleDialog().then((oDialog) => {
+          this._selectedItemContext = oEvent
+            .getSource()
+            .getParent()
+            .getBindingContext("task"); // Save context
+          oDialog.open();
+        });
+      },
+
+      async _getResponsibleDialog() {
+        if (!this.oResponsibleDialog) {
+          this.oResponsibleDialog = await this.loadFragment({
+            name: "ui5.test.view.ResponsibleDialog",
+          });
+        }
+        return this.oResponsibleDialog;
+      },
+      onResponsibleSelect(oEvent) {
+        const sSelectedResponsible = oEvent.getSource().getText();
+
+        if (this._selectedItemContext) {
+          const oModel = this.getView().getModel("task");
+          oModel.setProperty(
+            this._selectedItemContext.getPath() + "/responsible",
+            sSelectedResponsible
+          );
+        }
+
+        this._getResponsibleDialog().then((oDialog) => oDialog.close());
+      },
+
+      onResponsiblDialogClose() {
+        if (this.oResponsibleDialog) {
+          this.oResponsibleDialog.close();
+        }
+      },
       onDateChange(oEvent) {
         this._formatDateInput(oEvent);
       },
@@ -92,15 +129,37 @@ sap.ui.define(
             return;
           }
 
-          if (day < 1 || day > 31) {
+          // Days in month validation
+          const daysInMonth = [
+            31,
+            this._isLeapYear(year) ? 29 : 28,
+            31,
+            30,
+            31,
+            30,
+            31,
+            31,
+            30,
+            31,
+            30,
+            31,
+          ];
+
+          if (day < 1 || day > daysInMonth[month - 1]) {
             inputField.setValueState(sap.ui.core.ValueState.Error);
-            inputField.setValueStateText("День должен быть от 1 до 31.");
+            inputField.setValueStateText(
+              `Некорректный день для месяца ${month}.`
+            );
             return;
           }
 
           // If validation passes
           inputField.setValueState(sap.ui.core.ValueState.None);
         }
+      },
+
+      _isLeapYear(year) {
+        return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
       },
       onToggleEditMode(sChannel, sEvent, oData) {
         const isEditMode = oData.editMode;
@@ -170,21 +229,19 @@ sap.ui.define(
         console.log("before open"), this.oDialog.open();
       },
       _applyStringEdit(isEditMode) {
-        const oList = this.byId("dataList"); // Get the table
-        const aItems = oList.getItems(); // Get all items in the table
+        const oList = this.byId("dataList");
+        const aItems = oList.getItems();
         aItems.forEach((item) => {
-          const inputCells = item.getCells(); // Get all cells in the item
+          const inputCells = item.getCells();
 
-          // Assuming the order is: taskName, taskType, responsible (HBox), startDate, endDate
-          const taskNameCell = inputCells[0]; // Task Name
-          const taskTypeCell = inputCells[1]; // Task Type
-          const responsibleHBox = inputCells[2]; // HBox for Responsible
-          const responsibleInput = responsibleHBox.getItems()[0]; // Input in HBox
-          const responsibleButton = responsibleHBox.getItems()[1]; // HBox contains the Input for Responsible
-          const startDateCell = inputCells[3]; // Start Date
-          const endDateCell = inputCells[4]; // End Date
+          const taskNameCell = inputCells[0];
+          const taskTypeCell = inputCells[1];
+          const responsibleHBox = inputCells[2];
+          const responsibleInput = responsibleHBox.getItems()[0];
+          const responsibleButton = responsibleHBox.getItems()[1];
+          const startDateCell = inputCells[3];
+          const endDateCell = inputCells[4];
 
-          // Set editable based on isEditMode
           taskNameCell.setEditable(isEditMode);
           taskTypeCell.setEditable(isEditMode);
           responsibleInput.setEditable(isEditMode);
@@ -260,15 +317,15 @@ sap.ui.define(
         oModel.setProperty("taskName", sNewTaskName, oContext);
       },
       onTaskTypeChange(oEvent) {
-        const sNewTaskType = oEvent.getParameter("selectedItem").getKey(); // Get the selected key
+        const sNewTaskType = oEvent.getParameter("selectedItem").getKey();
         const oSource = oEvent.getSource();
-        const oItem = oSource.getParent(); // Get the parent ColumnListItem
-        const oContext = oItem.getBindingContext("task"); // Make sure the context is correct
+        const oItem = oSource.getParent();
+        const oContext = oItem.getBindingContext("task");
 
         if (oContext) {
-          const oModel = this.getView().getModel("task"); // Ensure you're using the right model
+          const oModel = this.getView().getModel("task");
           oModel.setProperty("taskType", sNewTaskType, oContext);
-          console.log(`Updated taskType to: ${sNewTaskType}`); // For debugging
+          console.log(`Updated taskType to: ${sNewTaskType}`);
         } else {
           console.error("Binding context not found for taskType change!");
         }
