@@ -442,7 +442,7 @@ sap.ui.define(
 
         const newItem = {
           taskName: "",
-          taskType: "",
+          taskType: "0",
           responsible: "",
           startDate: "",
           endDate: "",
