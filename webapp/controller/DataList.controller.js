@@ -31,8 +31,8 @@ sap.ui.define(
           this.onToggleEditMode,
           this
         );
-        const oList = this.byId("dataList"); // Получаем таблицу
-        const aItems = oList.getItems(); // Получаем все элементы в таблице
+        const oList = this.byId("dataList");
+        const aItems = oList.getItems();
 
         const oLocalModel = new JSONModel({ editMode: false });
         this.getView().setModel(oLocalModel, "local");
@@ -47,12 +47,13 @@ sap.ui.define(
         const oI18nModel = this.getOwnerComponent().getModel("i18n");
         return oI18nModel.getResourceBundle().getText(key);
       },
+
       onOpenResponsibleDialog(oEvent) {
         this._getResponsibleDialog().then((oDialog) => {
           this._selectedItemContext = oEvent
             .getSource()
             .getParent()
-            .getBindingContext("task"); // Save context
+            .getBindingContext("task");
           oDialog.open();
         });
       },
@@ -65,6 +66,7 @@ sap.ui.define(
         }
         return this.oResponsibleDialog;
       },
+
       onResponsibleSelect(oEvent) {
         const sSelectedResponsible = oEvent.getSource().getText();
 
@@ -84,16 +86,23 @@ sap.ui.define(
           this.oResponsibleDialog.close();
         }
       },
+
       onDateChange(oEvent) {
-        this._formatDateInput(oEvent);
-      },
-      _formatDateInput(oEvent) {
         const inputField = oEvent.getSource();
-        let value = inputField.getValue();
+        let value = inputField.getValue().trim();
 
-        value = value.replace(/[^\d.]/g, ""); // Remove non-digit characters
+        // Проверка на пустоту
+        if (!value) {
+          inputField.setValueState(sap.ui.core.ValueState.Error);
+          inputField.setValueStateText("Дата не может быть пустой.");
+          return;
+        } else {
+          inputField.setValueState(sap.ui.core.ValueState.None); // Сброс состояния ошибки для непустых значений
+        }
 
-        // Add format logic
+        value = value.replace(/[^\d.]/g, ""); // Удаление недопустимых символов
+
+        // Логика форматирования
         if (value.length >= 2 && value.length < 3) {
           value = value.slice(0, 2) + ".";
         }
@@ -106,9 +115,10 @@ sap.ui.define(
 
         inputField.setValue(value);
 
-        // Validate date
+        // Валидация даты
         this._validateDate(value, inputField);
       },
+
       _validateDate(value, inputField) {
         const datePattern = /^\d{2}\.\d{2}\.\d{4}$/; // DD.MM.YYYY format
         if (value && !datePattern.test(value)) {
@@ -161,6 +171,7 @@ sap.ui.define(
       _isLeapYear(year) {
         return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
       },
+
       onToggleEditMode(sChannel, sEvent, oData) {
         const isEditMode = oData.editMode;
         this._updateSettingsButtonState(isEditMode);
@@ -181,6 +192,7 @@ sap.ui.define(
 
         this._applyColumnVisibility();
       },
+
       _applyColumnVisibility() {
         const oColumnVisibilityModel =
           this.getView().getModel("columnVisibility");
@@ -228,6 +240,7 @@ sap.ui.define(
 
         console.log("before open"), this.oDialog.open();
       },
+
       _applyStringEdit(isEditMode) {
         const oList = this.byId("dataList");
         const aItems = oList.getItems();
@@ -257,12 +270,14 @@ sap.ui.define(
           oSettingsButton.setEnabled(!isEditMode);
         }
       },
+
       _updateAddDataButtonState(isEditMode) {
         const oAddDataButton = this.byId("addDataButton");
         if (oAddDataButton) {
           oAddDataButton.setEnabled(isEditMode);
         }
       },
+
       onDialogClose() {
         const oModel = this.getView().getModel("columnVisibility");
         this._applyColumnVisibility();
@@ -307,29 +322,56 @@ sap.ui.define(
         const oBinding = oList.getBinding("items");
         oBinding.filter(aFilter);
       },
+
       onTaskNameChange(oEvent) {
         const sNewTaskName = oEvent.getParameter("value");
         const oSource = oEvent.getSource();
         const oItem = oSource.getParent();
         const oContext = oItem.getBindingContext("task");
 
-        const oModel = this.getView().getModel("task");
-        oModel.setProperty("taskName", sNewTaskName, oContext);
+        if (sNewTaskName.trim() === "") {
+          oSource.setValueState(sap.ui.core.ValueState.Error);
+          oSource.setValueStateText("Название задания не может быть пустым.");
+        } else {
+          const oModel = this.getView().getModel("task");
+          oModel.setProperty("taskName", sNewTaskName, oContext);
+          oSource.setValueState(sap.ui.core.ValueState.None);
+        }
       },
+
       onTaskTypeChange(oEvent) {
-        const sNewTaskType = oEvent.getParameter("selectedItem").getKey();
+        const sSelectedTaskType = oEvent.getParameter("selectedItem")?.getKey();
+        if (!sSelectedTaskType) {
+          oEvent.getSource().setValueState(sap.ui.core.ValueState.Error);
+          oEvent
+            .getSource()
+            .setValueStateText("Тип задания должен быть выбран.");
+        } else {
+          const oSource = oEvent.getSource();
+          const oItem = oSource.getParent();
+          const oContext = oItem.getBindingContext("task");
+
+          const oModel = this.getView().getModel("task");
+          oModel.setProperty("taskType", sSelectedTaskType, oContext);
+          oSource.setValueState(sap.ui.core.ValueState.None);
+        }
+      },
+      onResponsibleChange(oEvent) {
+        const sNewResponsible = oEvent.getParameter("value");
         const oSource = oEvent.getSource();
         const oItem = oSource.getParent();
         const oContext = oItem.getBindingContext("task");
 
-        if (oContext) {
-          const oModel = this.getView().getModel("task");
-          oModel.setProperty("taskType", sNewTaskType, oContext);
-          console.log(`Updated taskType to: ${sNewTaskType}`);
+        if (sNewResponsible.trim() === "") {
+          oSource.setValueState(sap.ui.core.ValueState.Error);
+          oSource.setValueStateText("значение не может быть пустым.");
         } else {
-          console.error("Binding context not found for taskType change!");
+          const oModel = this.getView().getModel("task");
+          oModel.setProperty("responsible", sNewResponsible, oContext);
+          oSource.setValueState(sap.ui.core.ValueState.None);
         }
       },
+
       onExportData() {
         const oList = this.byId("dataList");
         const oBinding = oList.getBinding("items");
@@ -381,6 +423,7 @@ sap.ui.define(
           this
         );
       },
+
       onFilterData(oEvent) {
         const aFilter = [];
         const sQuery = oEvent.getParameter("query");
@@ -392,13 +435,11 @@ sap.ui.define(
         const oBinding = oList.getBinding("items");
         oBinding.filter(aFilter);
       },
-      // new method
 
       onAddData() {
-        const oModel = this.getView().getModel("task"); // Assuming the model is named "task"
-        const aData = oModel.getData().Tasks; // Get current data
+        const oModel = this.getView().getModel("task");
+        const aData = oModel.getData().Tasks;
 
-        // Create new empty object; adjust the properties as per your model
         const newItem = {
           taskName: "",
           taskType: "",
@@ -407,12 +448,60 @@ sap.ui.define(
           endDate: "",
         };
 
-        // Add new item at the beginning of the array
         aData.unshift(newItem);
 
-        // Update the model with the new data
         oModel.setProperty("/Tasks", aData);
         this._applyStringEdit(true);
+
+        this._validateNewRow(aData);
+      },
+      _validateNewRow(aData) {
+        const oList = this.byId("dataList");
+        const aItems = oList.getItems();
+
+        // Индекс добавленной строки
+        const lastIndex = 0;
+        const newItem = aData[lastIndex];
+
+        const oNewItemContext = oList.getBinding("items").getContexts()[
+          lastIndex
+        ];
+
+        // Проверка поля taskName
+        this.onTaskNameChange({
+          getParameter: () => newItem.taskName,
+          getSource: () => aItems[lastIndex].getCells()[0],
+          getBindingContext: () => oNewItemContext,
+        });
+
+        // Проверка поля responsible
+        this.onResponsibleChange({
+          getParameter: () => newItem.responsible,
+          getSource: () => aItems[lastIndex].getCells()[2].getItems()[0],
+          getBindingContext: () => oNewItemContext,
+        });
+
+        const createDateChangeEvent = (value, cell) => ({
+          getParameter: () => value,
+          getSource: () => cell,
+          getBindingContext: () => oNewItemContext,
+        });
+
+        // Проверка даты начала
+        this.onDateChange(
+          createDateChangeEvent(
+            newItem.startDate,
+            aItems[lastIndex].getCells()[3]
+          )
+        );
+
+        // Проверка даты окончания
+        this.onDateChange(
+          createDateChangeEvent(
+            newItem.endDate,
+            aItems[lastIndex].getCells()[4]
+          )
+        );
       },
     });
   }
