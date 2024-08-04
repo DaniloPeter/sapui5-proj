@@ -18,7 +18,9 @@ sap.ui.define(["sap/ui/core/mvc/Controller"], (Controller) => {
       const isCurrentlyInEditMode = oLocalModel.getProperty("/editMode");
       if (!isCurrentlyInEditMode) {
         oLocalModel.setProperty("/editMode", true);
+
         const oEventBus = sap.ui.getCore().getEventBus();
+        oEventBus.publish("Home", "refreshData");
         oEventBus.publish("App", "toggleEditMode", {
           editMode: this._isEditMode,
         });

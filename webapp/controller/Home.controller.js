@@ -2,6 +2,11 @@ sap.ui.define(["sap/ui/core/mvc/Controller"], function (Controller) {
   "use strict";
 
   return Controller.extend("ui5.test.controller.Home", {
+    onInit() {
+      const oEventBus = sap.ui.getCore().getEventBus();
+      oEventBus.subscribe("Home", "refreshData", this.onRefresh, this);
+      // Ваш существующий код...
+    },
     async onOpenDialog() {
       console.log("async"),
         (this.oDialog ??= await this.loadFragment({
