@@ -12,6 +12,11 @@ sap.ui.define(
       onInit() {
         const oEventBus = sap.ui.getCore().getEventBus();
         oEventBus.subscribe(
+          "App",
+          "validateRows",
+          this._validateAllRows.bind(this)
+        );
+        oEventBus.subscribe(
           "DataList",
           "applyFilter",
           this.onApplyFilter,
@@ -31,11 +36,20 @@ sap.ui.define(
           this.onToggleEditMode,
           this
         );
+
         const oList = this.byId("dataList");
         const aItems = oList.getItems();
 
         const oLocalModel = new JSONModel({ editMode: false });
         this.getView().setModel(oLocalModel, "local");
+
+        const tasksData = localStorage.getItem("tasks");
+        if (tasksData) {
+          const oTaskModel = this.getOwnerComponent().getModel("task");
+          const parsedTasks = JSON.parse(tasksData);
+          oTaskModel.setProperty("/Tasks", parsedTasks);
+          console.log("Tasks loaded from localStorage");
+        }
 
         this._applyStringEdit(false);
         this._updateSettingsButtonState(false);
@@ -74,17 +88,14 @@ sap.ui.define(
           const oModel = this.getView().getModel("task");
           const oContextPath = this._selectedItemContext.getPath();
 
-          // Устанавливаем значение в модель
           oModel.setProperty(
             oContextPath + "/responsible",
             sSelectedResponsible
           );
 
-          // Закрываем диалог
           this._getResponsibleDialog().then((oDialog) => {
             oDialog.close();
 
-            // Находим элемент управления responsibleInput
             const oList = this.byId("dataList");
             const aItems = oList.getItems();
             const oSource = aItems
@@ -94,9 +105,8 @@ sap.ui.define(
                   this._selectedItemContext.getPath()
               )
               .getCells()[2]
-              .getItems()[0]; // Находим ваш Input
+              .getItems()[0];
 
-            // Передаем корректный объект в onResponsibleChange
             this.onResponsibleChange({
               getParameter: () => sSelectedResponsible,
               getSource: () => oSource,
@@ -115,18 +125,16 @@ sap.ui.define(
         const inputField = oEvent.getSource();
         let value = inputField.getValue().trim();
 
-        // Проверка на пустоту
         if (!value) {
           inputField.setValueState(sap.ui.core.ValueState.Error);
           inputField.setValueStateText("Дата не может быть пустой.");
           return;
         } else {
-          inputField.setValueState(sap.ui.core.ValueState.None); // Сброс состояния ошибки для непустых значений
+          inputField.setValueState(sap.ui.core.ValueState.None);
         }
 
-        value = value.replace(/[^\d.]/g, ""); // Удаление недопустимых символов
+        value = value.replace(/[^\d.]/g, "");
 
-        // Логика форматирования
         if (value.length >= 2 && value.length < 3) {
           value = value.slice(0, 2) + ".";
         }
@@ -139,12 +147,11 @@ sap.ui.define(
 
         inputField.setValue(value);
 
-        // Валидация даты
         this._validateDate(value, inputField);
       },
 
       _validateDate(value, inputField) {
-        const datePattern = /^\d{2}\.\d{2}\.\d{4}$/; // DD.MM.YYYY format
+        const datePattern = /^\d{2}\.\d{2}\.\d{4}$/;
         if (value && !datePattern.test(value)) {
           inputField.setValueState(sap.ui.core.ValueState.Error);
           inputField.setValueStateText(
@@ -156,14 +163,12 @@ sap.ui.define(
         if (value) {
           const [day, month, year] = value.split(".").map(Number);
 
-          // Validate month and day
           if (month < 1 || month > 12) {
             inputField.setValueState(sap.ui.core.ValueState.Error);
             inputField.setValueStateText("Месяц должен быть от 1 до 12.");
             return;
           }
 
-          // Days in month validation
           const daysInMonth = [
             31,
             this._isLeapYear(year) ? 29 : 28,
@@ -187,7 +192,6 @@ sap.ui.define(
             return;
           }
 
-          // If validation passes
           inputField.setValueState(sap.ui.core.ValueState.None);
         }
       },
@@ -477,53 +481,65 @@ sap.ui.define(
         oModel.setProperty("/Tasks", aData);
         this._applyStringEdit(true);
       },
-      _validateNewRow(aData) {
+      _validateAllRows(sChannel, sEvent, fnCallback) {
         const oList = this.byId("dataList");
         const aItems = oList.getItems();
+        let isValid = true;
 
-        // Индекс добавленной строки
-        const lastIndex = 0;
-        const newItem = aData[lastIndex];
+        aItems.forEach((item, index) => {
+          const oContext = item.getBindingContext("task");
+          const taskData = this.getView()
+            .getModel("task")
+            .getProperty(oContext.getPath());
 
-        const oNewItemContext = oList.getBinding("items").getContexts()[
-          lastIndex
-        ];
+          const createChangeEvent = (name, value, cell) => ({
+            getParameter: () => value,
+            getSource: () => cell,
+            getBindingContext: () => oContext,
+          });
 
-        // Проверка поля taskName
-        this.onTaskNameChange({
-          getParameter: () => newItem.taskName,
-          getSource: () => aItems[lastIndex].getCells()[0],
-          getBindingContext: () => oNewItemContext,
+          // Validate task name
+          this.onTaskNameChange(
+            createChangeEvent("taskName", taskData.taskName, item.getCells()[0])
+          );
+
+          // Validate responsible
+          this.onResponsibleChange(
+            createChangeEvent(
+              "responsible",
+              taskData.responsible,
+              item.getCells()[2].getItems()[0]
+            )
+          );
+
+          const startDateInput = item.getCells()[3];
+          const endDateInput = item.getCells()[4];
+
+          // Validate start date
+          this.onDateChange(
+            createChangeEvent("startDate", taskData.startDate, startDateInput)
+          );
+
+          // Validate end date
+          this.onDateChange(
+            createChangeEvent("endDate", taskData.endDate, endDateInput)
+          );
+
+          // Check if any validations failed
+          if (
+            startDateInput.getValueState() === sap.ui.core.ValueState.Error ||
+            item.getCells()[0].getValueState() ===
+              sap.ui.core.ValueState.Error ||
+            item.getCells()[2].getItems()[0].getValueState() ===
+              sap.ui.core.ValueState.Error
+          ) {
+            isValid = false;
+          }
         });
 
-        // Проверка поля responsible
-        this.onResponsibleChange({
-          getParameter: () => newItem.responsible,
-          getSource: () => aItems[lastIndex].getCells()[2].getItems()[0],
-          getBindingContext: () => oNewItemContext,
-        });
-
-        const createDateChangeEvent = (value, cell) => ({
-          getParameter: () => value,
-          getSource: () => cell,
-          getBindingContext: () => oNewItemContext,
-        });
-
-        // Проверка даты начала
-        this.onDateChange(
-          createDateChangeEvent(
-            newItem.startDate,
-            aItems[lastIndex].getCells()[3]
-          )
-        );
-
-        // Проверка даты окончания
-        this.onDateChange(
-          createDateChangeEvent(
-            newItem.endDate,
-            aItems[lastIndex].getCells()[4]
-          )
-        );
+        if (typeof fnCallback === "function") {
+          fnCallback(isValid);
+        }
       },
     });
   }

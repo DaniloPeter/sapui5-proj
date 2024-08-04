@@ -29,16 +29,34 @@ sap.ui.define(["sap/ui/core/mvc/Controller"], (Controller) => {
       }
     },
     onSave() {
-      this._isEditMode = false;
       console.log("save pressed");
 
       const oLocalModel = this.getView().getModel("local");
       const isCurrentlyInEditMode = oLocalModel.getProperty("/editMode");
+
       if (isCurrentlyInEditMode) {
-        oLocalModel.setProperty("/editMode", this._isEditMode);
         const oEventBus = sap.ui.getCore().getEventBus();
-        oEventBus.publish("App", "toggleEditMode", {
-          editMode: this._isEditMode,
+
+        // Create a callback to handle the validation result
+        oEventBus.publish("App", "validateRows", (isValid) => {
+          if (!isValid) {
+            console.log("Validation failed");
+            // Keep edit mode and return without saving
+            return;
+          } else {
+            this._isEditMode = false;
+            oLocalModel.setProperty("/editMode", this._isEditMode);
+
+            const oTaskModel = this.getOwnerComponent().getModel("task");
+            const aTasks = oTaskModel.getData().Tasks;
+
+            localStorage.setItem("tasks", JSON.stringify(aTasks));
+            console.log("Tasks saved to localStorage");
+
+            oEventBus.publish("App", "toggleEditMode", {
+              editMode: this._isEditMode,
+            });
+          }
         });
       }
     },
