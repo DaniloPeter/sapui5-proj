@@ -5,7 +5,6 @@ sap.ui.define(["sap/ui/core/mvc/Controller"], function (Controller) {
     onInit() {
       const oEventBus = sap.ui.getCore().getEventBus();
       oEventBus.subscribe("Home", "refreshData", this.onRefresh, this);
-      // Ваш существующий код...
     },
     async onOpenDialog() {
       console.log("async"),

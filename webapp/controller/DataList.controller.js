@@ -154,9 +154,7 @@ sap.ui.define(
         const datePattern = /^\d{2}\.\d{2}\.\d{4}$/;
         if (value && !datePattern.test(value)) {
           inputField.setValueState(sap.ui.core.ValueState.Error);
-          inputField.setValueStateText(
-            "Некорректный формат даты. Используйте ДД.ММ.ГГГГ."
-          );
+          inputField.setValueStateText("Некорректный формат даты.");
           return;
         }
 
@@ -472,7 +470,7 @@ sap.ui.define(
           taskName: "",
           taskType: "0",
           responsible: "",
-          startDate: "",
+          startDate: this._getCurrentDate(),
           endDate: "",
         };
 
@@ -480,6 +478,14 @@ sap.ui.define(
 
         oModel.setProperty("/Tasks", aData);
         this._applyStringEdit(true);
+      },
+      _getCurrentDate() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, "0");
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const year = now.getFullYear();
+
+        return `${day}.${month}.${year}`;
       },
       _validateAllRows(sChannel, sEvent, fnCallback) {
         const oList = this.byId("dataList");
@@ -498,12 +504,10 @@ sap.ui.define(
             getBindingContext: () => oContext,
           });
 
-          // Validate task name
           this.onTaskNameChange(
             createChangeEvent("taskName", taskData.taskName, item.getCells()[0])
           );
 
-          // Validate responsible
           this.onResponsibleChange(
             createChangeEvent(
               "responsible",
@@ -515,18 +519,46 @@ sap.ui.define(
           const startDateInput = item.getCells()[3];
           const endDateInput = item.getCells()[4];
 
-          // Validate start date
           this.onDateChange(
             createChangeEvent("startDate", taskData.startDate, startDateInput)
           );
 
-          // Validate end date
           this.onDateChange(
             createChangeEvent("endDate", taskData.endDate, endDateInput)
           );
 
-          // Check if any validations failed
+          const startDateValue = startDateInput.getValue();
+          const endDateValue = endDateInput.getValue();
+
+          const parseDate = (dateStr) => {
+            const parts = dateStr.split(".");
+            if (parts.length !== 3) return null;
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            const year = parseInt(parts[2], 10);
+            return { day, month, year };
+          };
+
+          const startDate = parseDate(startDateValue);
+          const endDate = parseDate(endDateValue);
+
           if (
+            !endDate ||
+            !startDate ||
+            endDate.year < startDate.year ||
+            (endDate.year === startDate.year &&
+              endDate.month < startDate.month) ||
+            (endDate.year === startDate.year &&
+              endDate.month === startDate.month &&
+              endDate.day < startDate.day)
+          ) {
+            endDateInput.setValueState(sap.ui.core.ValueState.Error);
+          } else {
+            startDateInput.setValueState(sap.ui.core.ValueState.None);
+          }
+
+          if (
+            endDateInput.getValueState() === sap.ui.core.ValueState.Error ||
             startDateInput.getValueState() === sap.ui.core.ValueState.Error ||
             item.getCells()[0].getValueState() ===
               sap.ui.core.ValueState.Error ||

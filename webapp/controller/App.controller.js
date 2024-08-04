@@ -37,11 +37,10 @@ sap.ui.define(["sap/ui/core/mvc/Controller"], (Controller) => {
       if (isCurrentlyInEditMode) {
         const oEventBus = sap.ui.getCore().getEventBus();
 
-        // Create a callback to handle the validation result
         oEventBus.publish("App", "validateRows", (isValid) => {
           if (!isValid) {
             console.log("Validation failed");
-            // Keep edit mode and return without saving
+
             return;
           } else {
             this._isEditMode = false;
