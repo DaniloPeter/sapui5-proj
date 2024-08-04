@@ -20,11 +20,14 @@
                     </content>
                     <footer>
                         <Toolbar>
-                            <Button text="Редактировать" press=".onEdit" />
+                            <Button text="Редактировать" press=".onEdit"
+                                enabled="{= !${local>/editMode}}" />
                             <ToolbarSpacer />
-                            <Button text="Сохранить" press=".onSave" />
+                            <Button text="Сохранить" press=".onSave"
+                                enabled="{= ${local>/editMode}}" />
                             <ToolbarSpacer />
-                            <Button text="Выгрузить в Excel" press=".onExport" />
+                            <Button text="Выгрузить в Excel" press=".onExport"
+                                enabled="{= !${local>/editMode}}" />
                         </Toolbar>
                     </footer>
                 </Page>

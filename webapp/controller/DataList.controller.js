@@ -72,13 +72,37 @@ sap.ui.define(
 
         if (this._selectedItemContext) {
           const oModel = this.getView().getModel("task");
+          const oContextPath = this._selectedItemContext.getPath();
+
+          // Устанавливаем значение в модель
           oModel.setProperty(
-            this._selectedItemContext.getPath() + "/responsible",
+            oContextPath + "/responsible",
             sSelectedResponsible
           );
-        }
 
-        this._getResponsibleDialog().then((oDialog) => oDialog.close());
+          // Закрываем диалог
+          this._getResponsibleDialog().then((oDialog) => {
+            oDialog.close();
+
+            // Находим элемент управления responsibleInput
+            const oList = this.byId("dataList");
+            const aItems = oList.getItems();
+            const oSource = aItems
+              .find(
+                (item) =>
+                  item.getBindingContext("task").getPath() ===
+                  this._selectedItemContext.getPath()
+              )
+              .getCells()[2]
+              .getItems()[0]; // Находим ваш Input
+
+            // Передаем корректный объект в onResponsibleChange
+            this.onResponsibleChange({
+              getParameter: () => sSelectedResponsible,
+              getSource: () => oSource,
+            });
+          });
+        }
       },
 
       onResponsiblDialogClose() {
@@ -452,8 +476,6 @@ sap.ui.define(
 
         oModel.setProperty("/Tasks", aData);
         this._applyStringEdit(true);
-
-        this._validateNewRow(aData);
       },
       _validateNewRow(aData) {
         const oList = this.byId("dataList");
